@@ -1,4 +1,6 @@
 import { links, type Link, type InsertLink } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getLinks(): Promise<Link[]>;
@@ -6,42 +8,28 @@ export interface IStorage {
   getLinksByTag(tag: string): Promise<Link[]>;
 }
 
-export class MemStorage implements IStorage {
-  private links: Map<number, Link>;
-  private currentId: number;
-
-  constructor() {
-    this.links = new Map();
-    this.currentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getLinks(): Promise<Link[]> {
-    return Array.from(this.links.values()).sort((a, b) => 
-      (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)
-    );
+    const allLinks = await db.select().from(links).orderBy(links.createdAt);
+    return allLinks.reverse();
   }
 
   async createLink(insertLink: InsertLink): Promise<Link> {
-    const id = this.currentId++;
-    const link: Link = {
-      id,
-      url: insertLink.url,
-      title: insertLink.title,
-      imageUrl: insertLink.imageUrl ?? null,
-      tags: insertLink.tags ?? [],
-      scrapedTitle: insertLink.scrapedTitle ?? null,
-      scrapedImage: insertLink.scrapedImage ?? null,
-      createdAt: new Date(),
-    };
-    this.links.set(id, link);
+    const [link] = await db
+      .insert(links)
+      .values(insertLink)
+      .returning();
     return link;
   }
 
   async getLinksByTag(tag: string): Promise<Link[]> {
-    return Array.from(this.links.values())
-      .filter((link) => link.tags?.includes(tag))
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+    const taggedLinks = await db
+      .select()
+      .from(links)
+      .where(eq(links.tags.array.includes([tag]), true))
+      .orderBy(links.createdAt);
+    return taggedLinks.reverse();
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
