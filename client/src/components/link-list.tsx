@@ -65,7 +65,7 @@ export default function LinkList({ links, onTagClick }: LinkListProps) {
 
   return (
     <ScrollArea className="h-[calc(100vh-300px)]">
-      <div className="space-y-4 pr-4">
+      <div className="space-y-4">
         {links.map((link) => (
           <Card key={link.id}>
             <CardContent className="pt-6 grid md:grid-cols-[200px,1fr] gap-4">

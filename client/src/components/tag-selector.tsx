@@ -42,7 +42,7 @@ export default function TagSelector({ tags, selectedTag, onSelect }: TagSelector
                 {selectedTag}
               </Badge>
             ) : (
-              "Select tag..."
+              "Filter by tag..."
             )}
           </div>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
