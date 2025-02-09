@@ -25,7 +25,7 @@ async function scrapeMetadata(url: string) {
   }
 }
 
-export function registerRoutes(app: Express): Server {
+export function registerRoutes(app: Express): void {
   app.get("/api/links", async (_req, res) => {
     const links = await storage.getLinks();
     res.json(links);
@@ -66,7 +66,4 @@ export function registerRoutes(app: Express): Server {
     await storage.deleteLink(id);
     res.status(204).end();
   });
-
-  const httpServer = createServer(app);
-  return httpServer;
 }
