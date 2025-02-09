@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Link } from "@shared/schema";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,16 +10,12 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 type LinkListProps = {
-  selectedTag?: string;
+  links?: Link[];
 };
 
-export default function LinkList({ selectedTag }: LinkListProps) {
+export default function LinkList({ links }: LinkListProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const { data: links, isLoading } = useQuery<Link[]>({
-    queryKey: selectedTag ? ["/api/links/tag", selectedTag] : ["/api/links"],
-  });
 
   const deleteLink = useMutation({
     mutationFn: async (id: number) => {
@@ -41,7 +37,7 @@ export default function LinkList({ selectedTag }: LinkListProps) {
     },
   });
 
-  if (isLoading) {
+  if (!links) {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
@@ -56,7 +52,7 @@ export default function LinkList({ selectedTag }: LinkListProps) {
     );
   }
 
-  if (!links?.length) {
+  if (!links.length) {
     return (
       <Card>
         <CardContent className="pt-6 text-center text-muted-foreground">
@@ -86,7 +82,7 @@ export default function LinkList({ selectedTag }: LinkListProps) {
               )}
               <div className="space-y-2">
                 <div className="flex justify-between items-start gap-4">
-                  <CardTitle className="text-lg line-clamp-2">
+                  <h3 className="text-lg font-semibold line-clamp-2">
                     <a
                       href={link.url}
                       target="_blank"
@@ -96,7 +92,7 @@ export default function LinkList({ selectedTag }: LinkListProps) {
                       {link.title}
                       <Link2 className="h-4 w-4" />
                     </a>
-                  </CardTitle>
+                  </h3>
                   <Button
                     variant="ghost"
                     size="icon"
