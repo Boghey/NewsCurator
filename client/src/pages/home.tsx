@@ -65,7 +65,10 @@ export default function Home() {
       {/* Main content */}
       <div className="container flex-1 py-6">
         <LinkForm />
-        <LinkList links={filteredLinks} />
+        <LinkList 
+          links={filteredLinks}
+          onTagClick={setSelectedTag}
+        />
       </div>
     </div>
   );

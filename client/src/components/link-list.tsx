@@ -11,9 +11,10 @@ import { useToast } from "@/hooks/use-toast";
 
 type LinkListProps = {
   links?: Link[];
+  onTagClick?: (tag: string) => void;
 };
 
-export default function LinkList({ links }: LinkListProps) {
+export default function LinkList({ links, onTagClick }: LinkListProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -104,7 +105,12 @@ export default function LinkList({ links }: LinkListProps) {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {(link.tags || []).map((tag) => (
-                    <Badge key={tag} variant="secondary">
+                    <Badge
+                      key={tag}
+                      variant="secondary"
+                      className="cursor-pointer hover:bg-secondary/80"
+                      onClick={() => onTagClick?.(tag)}
+                    >
                       {tag}
                     </Badge>
                   ))}
