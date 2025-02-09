@@ -1,5 +1,4 @@
-import type { Express } from "express";
-import { Router } from "express";
+import type { Express, Router } from "express";
 import { storage } from "./storage";
 import * as cheerio from "cheerio";
 import { insertLinkSchema } from "@shared/schema";
@@ -27,17 +26,20 @@ async function scrapeMetadata(url: string) {
   }
 }
 
-export function registerRoutes(app: Express): Express {
-  const router = Router();
+export function registerRoutes(app: Express, router: Router): Express {
+  router.get("/hello", (req, res) => {
+    res.send("Hello World!");
+  })
+  
   router.get("/links", async (_req, res) => {
     const links = await storage.getLinks();
-    res.json(links);
+    res.send(links);
   });
 
   router.get("/links/tag/:tag", async (req, res) => {
     const { tag } = req.params;
     const links = await storage.getLinksByTag(tag);
-    res.json(links);
+    res.send(links);
   });
 
   router.post("/links/scrape", async (req, res) => {
@@ -47,14 +49,14 @@ export function registerRoutes(app: Express): Express {
     }
 
     const metadata = await scrapeMetadata(url);
-    res.json(metadata);
+    res.send(metadata);
   });
 
   router.post("/links", async (req, res) => {
     try {
       const link = insertLinkSchema.parse(req.body);
       const created = await storage.createLink(link);
-      res.json(created);
+      res.send(created);
     } catch (error) {
       res.status(400).json({ message: "Invalid link data" });
     }
