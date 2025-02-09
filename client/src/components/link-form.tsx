@@ -16,7 +16,7 @@ export default function LinkForm() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isScrapingMetadata, setIsScrapingMetadata] = useState(false);
-  
+
   const form = useForm<InsertLink>({
     resolver: zodResolver(insertLinkSchema),
     defaultValues: {
@@ -24,8 +24,8 @@ export default function LinkForm() {
       title: "",
       imageUrl: "",
       tags: [],
-      scrapedTitle: "",
-      scrapedImage: "",
+      scrapedTitle: null,
+      scrapedImage: null,
     },
   });
 
@@ -56,11 +56,11 @@ export default function LinkForm() {
         body: JSON.stringify({ url }),
       });
       const { title, image } = await res.json();
-      
-      form.setValue("scrapedTitle", title || "");
-      form.setValue("scrapedImage", image || "");
-      form.setValue("title", title || "");
-      form.setValue("imageUrl", image || "");
+
+      form.setValue("scrapedTitle", title);
+      form.setValue("scrapedImage", image);
+      if (title) form.setValue("title", title);
+      if (image) form.setValue("imageUrl", image);
     } catch (error) {
       toast({
         title: "Error",
@@ -86,7 +86,10 @@ export default function LinkForm() {
                   <FormControl>
                     <Input
                       {...field}
-                      onBlur={handleUrlBlur}
+                      onBlur={() => {
+                        field.onBlur();
+                        handleUrlBlur();
+                      }}
                       placeholder="https://example.com"
                     />
                   </FormControl>
@@ -112,11 +115,16 @@ export default function LinkForm() {
             <FormField
               control={form.control}
               name="imageUrl"
-              render={({ field }) => (
+              render={({ field: { value, onChange, ...field } }) => (
                 <FormItem>
                   <FormLabel>Image URL</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter image URL" />
+                    <Input 
+                      {...field}
+                      value={value || ""}
+                      onChange={(e) => onChange(e.target.value)}
+                      placeholder="Enter image URL"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

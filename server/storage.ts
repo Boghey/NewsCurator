@@ -24,8 +24,13 @@ export class MemStorage implements IStorage {
   async createLink(insertLink: InsertLink): Promise<Link> {
     const id = this.currentId++;
     const link: Link = {
-      ...insertLink,
       id,
+      url: insertLink.url,
+      title: insertLink.title,
+      imageUrl: insertLink.imageUrl ?? null,
+      tags: insertLink.tags ?? [],
+      scrapedTitle: insertLink.scrapedTitle ?? null,
+      scrapedImage: insertLink.scrapedImage ?? null,
       createdAt: new Date(),
     };
     this.links.set(id, link);
@@ -34,7 +39,7 @@ export class MemStorage implements IStorage {
 
   async getLinksByTag(tag: string): Promise<Link[]> {
     return Array.from(this.links.values())
-      .filter((link) => link.tags.includes(tag))
+      .filter((link) => link.tags?.includes(tag))
       .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
   }
 }

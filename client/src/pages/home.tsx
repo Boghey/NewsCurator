@@ -7,13 +7,13 @@ import type { Link } from "@shared/schema";
 
 export default function Home() {
   const [selectedTag, setSelectedTag] = useState<string>();
-  
+
   const { data: links } = useQuery<Link[]>({
     queryKey: ["/api/links"],
   });
 
   const uniqueTags = Array.from(
-    new Set(links?.flatMap((link) => link.tags) || [])
+    new Set(links?.flatMap((link) => link.tags || []) || [])
   );
 
   return (
@@ -21,9 +21,9 @@ export default function Home() {
       <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
         Link Collector
       </h1>
-      
+
       <LinkForm />
-      
+
       {uniqueTags.length > 0 && (
         <div className="mb-4 flex gap-2 flex-wrap">
           <Badge
@@ -45,7 +45,7 @@ export default function Home() {
           ))}
         </div>
       )}
-      
+
       <LinkList selectedTag={selectedTag} />
     </div>
   );

@@ -71,7 +71,7 @@ export default function LinkList({ selectedTag }: LinkListProps) {
                   </a>
                 </CardTitle>
                 <div className="flex flex-wrap gap-2">
-                  {link.tags.map((tag) => (
+                  {(link.tags || []).map((tag) => (
                     <Badge key={tag} variant="secondary">
                       {tag}
                     </Badge>
