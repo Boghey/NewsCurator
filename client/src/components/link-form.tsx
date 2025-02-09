@@ -1,6 +1,4 @@
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertLinkSchema, type InsertLink } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,8 +15,7 @@ export default function LinkForm() {
   const queryClient = useQueryClient();
   const [isScrapingMetadata, setIsScrapingMetadata] = useState(false);
 
-  const form = useForm<InsertLink>({
-    resolver: zodResolver(insertLinkSchema),
+  const form = useForm({
     defaultValues: {
       url: "",
       title: "",
@@ -30,7 +27,7 @@ export default function LinkForm() {
   });
 
   const createLink = useMutation({
-    mutationFn: async (data: InsertLink) => {
+    mutationFn: async (data) => {
       const res = await apiRequest("POST", "/api/links", data);
       return res.json();
     },
