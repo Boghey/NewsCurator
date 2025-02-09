@@ -4,7 +4,7 @@ import LinkList from "@/components/link-list";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import type { Link } from "@shared/schema";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tag, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -53,10 +53,10 @@ export default function Home() {
 
             {/* Tags */}
             {uniqueTags.length > 0 && (
-              <div className="flex items-center gap-2 overflow-x-auto pb-2">
+              <div className="flex items-center gap-2">
                 <Tag className="h-4 w-4 flex-shrink-0" />
-                <ScrollArea className="w-full" orientation="horizontal">
-                  <div className="flex gap-2">
+                <ScrollArea className="w-full">
+                  <div className="flex gap-2 pb-2">
                     <Badge
                       variant={selectedTag ? "outline" : "default"}
                       className="cursor-pointer whitespace-nowrap px-4 py-2 text-sm"
@@ -75,6 +75,7 @@ export default function Home() {
                       </Badge>
                     ))}
                   </div>
+                  <ScrollBar orientation="horizontal" />
                 </ScrollArea>
               </div>
             )}

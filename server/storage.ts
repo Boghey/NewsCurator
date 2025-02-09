@@ -1,6 +1,6 @@
 import { links, type Link, type InsertLink } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, arrayContains } from "drizzle-orm";
 
 export interface IStorage {
   getLinks(): Promise<Link[]>;
@@ -27,7 +27,7 @@ export class DatabaseStorage implements IStorage {
     const taggedLinks = await db
       .select()
       .from(links)
-      .where(eq(links.tags.array.includes([tag]), true))
+      .where(arrayContains(links.tags, [tag]))
       .orderBy(links.createdAt);
     return taggedLinks.reverse();
   }
