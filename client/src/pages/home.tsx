@@ -22,30 +22,33 @@ export default function Home() {
         Link Collector
       </h1>
 
-      <LinkForm />
-
+      {/* Move tags to top for better mobile visibility */}
       {uniqueTags.length > 0 && (
-        <div className="mb-4 flex gap-2 flex-wrap">
-          <Badge
-            variant={selectedTag ? "outline" : "default"}
-            className="cursor-pointer"
-            onClick={() => setSelectedTag(undefined)}
-          >
-            All
-          </Badge>
-          {uniqueTags.map((tag) => (
+        <div className="mb-6 bg-muted/50 p-4 rounded-lg">
+          <h2 className="font-semibold mb-3 text-lg">Filter by Tags</h2>
+          <div className="flex gap-2 flex-wrap">
             <Badge
-              key={tag}
-              variant={selectedTag === tag ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => setSelectedTag(tag)}
+              variant={selectedTag ? "outline" : "default"}
+              className="cursor-pointer px-4 py-2 text-base"
+              onClick={() => setSelectedTag(undefined)}
             >
-              {tag}
+              All
             </Badge>
-          ))}
+            {uniqueTags.map((tag) => (
+              <Badge
+                key={tag}
+                variant={selectedTag === tag ? "default" : "outline"}
+                className="cursor-pointer px-4 py-2 text-base"
+                onClick={() => setSelectedTag(tag)}
+              >
+                {tag}
+              </Badge>
+            ))}
+          </div>
         </div>
       )}
 
+      <LinkForm />
       <LinkList selectedTag={selectedTag} />
     </div>
   );
