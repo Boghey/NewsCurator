@@ -6,6 +6,7 @@ export interface IStorage {
   getLinks(): Promise<Link[]>;
   createLink(link: InsertLink): Promise<Link>;
   getLinksByTag(tag: string): Promise<Link[]>;
+  deleteLink(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -29,6 +30,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(links.tags.array.includes([tag]), true))
       .orderBy(links.createdAt);
     return taggedLinks.reverse();
+  }
+
+  async deleteLink(id: number): Promise<void> {
+    await db.delete(links).where(eq(links.id, id));
   }
 }
 

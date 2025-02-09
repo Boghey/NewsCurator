@@ -10,14 +10,14 @@ async function scrapeMetadata(url: string) {
     const response = await fetch(url);
     const html = await response.text();
     const $ = cheerio.load(html);
-    
+
     const title = $('meta[property="og:title"]').attr('content') || 
                  $('title').text() || 
                  $('meta[name="title"]').attr('content');
-                 
+
     const image = $('meta[property="og:image"]').attr('content') || 
                  $('meta[property="twitter:image"]').attr('content');
-    
+
     return { title, image };
   } catch (error) {
     console.error('Error scraping metadata:', error);
@@ -42,7 +42,7 @@ export function registerRoutes(app: Express): Server {
     if (!url) {
       return res.status(400).json({ message: "URL is required" });
     }
-    
+
     const metadata = await scrapeMetadata(url);
     res.json(metadata);
   });
@@ -55,6 +55,16 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       res.status(400).json({ message: "Invalid link data" });
     }
+  });
+
+  app.delete("/api/links/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid link ID" });
+    }
+
+    await storage.deleteLink(id);
+    res.status(204).end();
   });
 
   const httpServer = createServer(app);

@@ -1,18 +1,44 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Link } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Link2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link2, Trash2 } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 type LinkListProps = {
   selectedTag?: string;
 };
 
 export default function LinkList({ selectedTag }: LinkListProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: links, isLoading } = useQuery<Link[]>({
     queryKey: selectedTag ? ["/api/links/tag", selectedTag] : ["/api/links"],
+  });
+
+  const deleteLink = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/links/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/links"] });
+      toast({
+        title: "Success",
+        description: "Link deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete link",
+        variant: "destructive",
+      });
+    },
   });
 
   if (isLoading) {
@@ -59,17 +85,27 @@ export default function LinkList({ selectedTag }: LinkListProps) {
                 </div>
               )}
               <div className="space-y-2">
-                <CardTitle className="text-lg line-clamp-2">
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline flex items-center gap-2"
+                <div className="flex justify-between items-start gap-4">
+                  <CardTitle className="text-lg line-clamp-2">
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline flex items-center gap-2"
+                    >
+                      {link.title}
+                      <Link2 className="h-4 w-4" />
+                    </a>
+                  </CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteLink.mutate(link.id)}
+                    disabled={deleteLink.isPending}
                   >
-                    {link.title}
-                    <Link2 className="h-4 w-4" />
-                  </a>
-                </CardTitle>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {(link.tags || []).map((tag) => (
                     <Badge key={tag} variant="secondary">
