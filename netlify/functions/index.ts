@@ -1,8 +1,7 @@
 import express, { Router } from "express";
-import { storage } from "./server/storage";
 import {scrapeMetadata} from "./server/routes";
-import {insertLinkSchema} from "./shared/schema";
 import serverless from "serverless-http";
+import {storage} from "./prisma/storage"
 
 const app = express();
 const router = Router();
@@ -34,8 +33,7 @@ router.post("/links/scrape", async (req, res) => {
 
 router.post("/links", async (req, res) => {
   try {
-    const link = insertLinkSchema.parse(req.body);
-    const created = await storage.createLink(link);
+    const created = await storage.createLink(req.body);
     res.send(created);
   } catch (error) {
     res.status(400).json({ message: "Invalid link data" });
