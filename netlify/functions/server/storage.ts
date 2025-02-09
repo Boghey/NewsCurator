@@ -1,4 +1,4 @@
-import { links, type Link, type InsertLink } from "@shared/schema";
+import { links, type Link, type InsertLink } from "../shared/schema";
 import { db } from "./db";
 import { eq, arrayContains } from "drizzle-orm";
 
