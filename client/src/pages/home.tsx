@@ -1,12 +1,11 @@
 import { useState } from "react";
 import LinkForm from "@/components/link-form";
 import LinkList from "@/components/link-list";
-import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import type { Link } from "@shared/schema";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Tag, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import TagSelector from "@/components/tag-selector";
 
 export default function Home() {
   const [selectedTag, setSelectedTag] = useState<string>();
@@ -18,7 +17,7 @@ export default function Home() {
 
   const uniqueTags = Array.from(
     new Set(links?.flatMap((link) => link.tags || []) || [])
-  );
+  ).sort();
 
   const filteredLinks = links?.filter((link) => {
     const matchesSearch = searchQuery === "" || 
@@ -51,33 +50,13 @@ export default function Home() {
               />
             </div>
 
-            {/* Tags */}
+            {/* Tag selector */}
             {uniqueTags.length > 0 && (
-              <div className="flex items-center gap-2">
-                <Tag className="h-4 w-4 flex-shrink-0" />
-                <ScrollArea className="w-full">
-                  <div className="flex gap-2 pb-2">
-                    <Badge
-                      variant={selectedTag ? "outline" : "default"}
-                      className="cursor-pointer whitespace-nowrap px-4 py-2 text-sm"
-                      onClick={() => setSelectedTag(undefined)}
-                    >
-                      All Links
-                    </Badge>
-                    {uniqueTags.map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant={selectedTag === tag ? "default" : "outline"}
-                        className="cursor-pointer whitespace-nowrap px-4 py-2 text-sm"
-                        onClick={() => setSelectedTag(tag)}
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
-              </div>
+              <TagSelector
+                tags={uniqueTags}
+                selectedTag={selectedTag}
+                onSelect={setSelectedTag}
+              />
             )}
           </div>
         </div>
