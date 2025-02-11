@@ -8,7 +8,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import TagInput from "./tag-input";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Calendar } from "lucide-react";
+import { format } from "date-fns";
 
 export default function LinkForm() {
   const { toast } = useToast();
@@ -20,9 +21,11 @@ export default function LinkForm() {
       url: "",
       title: "",
       imageUrl: "",
+      publishedDate: "",
       tags: [],
       scrapedTitle: null,
       scrapedImage: null,
+      scrapedDate: null,
     },
   });
 
@@ -52,12 +55,14 @@ export default function LinkForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
       });
-      const { title, image } = await res.json();
+      const { title, image, publishedDate } = await res.json();
 
       form.setValue("scrapedTitle", title);
       form.setValue("scrapedImage", image);
+      form.setValue("scrapedDate", publishedDate);
       if (title) form.setValue("title", title);
       if (image) form.setValue("imageUrl", image);
+      if (publishedDate) form.setValue("publishedDate", publishedDate);
     } catch (error) {
       toast({
         title: "Error",
@@ -122,6 +127,29 @@ export default function LinkForm() {
                       onChange={(e) => onChange(e.target.value)}
                       placeholder="Enter image URL"
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="publishedDate"
+              render={({ field: { value, onChange, ...field } }) => (
+                <FormItem>
+                  <FormLabel>Published Date</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input 
+                        {...field}
+                        value={value || ""}
+                        onChange={(e) => onChange(e.target.value)}
+                        type="date"
+                        className="pl-10"
+                      />
+                      <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

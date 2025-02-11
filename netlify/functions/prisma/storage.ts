@@ -5,6 +5,7 @@ export const insertLinkSchema = z.object({
   url: z.string().url("Please enter a valid URL"),
   title: z.string(),
   imageUrl: z.string().optional(),
+  publishedDate: z.string().optional(),
   tags: z.array(z.string()).default([]),
   scrapedTitle: z.string().optional(),
   scrapedImage: z.string().optional(),
@@ -42,7 +43,7 @@ export class DatabaseStorage implements IStorage {
     return await this.prisma.link.findMany({
       where: {
         tags: {
-          has: tag, // Prisma equivalent of arrayContains
+          has: tag,
         },
       },
       orderBy: { createdAt: "desc" },

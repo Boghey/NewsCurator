@@ -16,9 +16,16 @@ export async function scrapeMetadata(url: string) {
       $('meta[property="og:image"]').attr("content") ||
       $('meta[property="twitter:image"]').attr("content");
 
-    return { title, image };
+    // Extract published date from various meta tags
+    const publishedDate =
+      $('meta[property="article:published_time"]').attr("content") ||
+      $('meta[property="og:published_time"]').attr("content") ||
+      $('meta[name="publishedDate"]').attr("content") ||
+      $('meta[name="date"]').attr("content");
+
+    return { title, image, publishedDate };
   } catch (error) {
     console.error("Error scraping metadata:", error);
-    return { title: null, image: null };
+    return { title: null, image: null, publishedDate: null };
   }
 }

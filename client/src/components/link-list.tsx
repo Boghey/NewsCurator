@@ -5,9 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Link2, Trash2 } from "lucide-react";
+import { Link2, Trash2, Calendar } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
 type LinkListProps = {
   links?: Link[];
@@ -83,17 +84,25 @@ export default function LinkList({ links, onTagClick }: LinkListProps) {
               )}
               <div className="space-y-2">
                 <div className="flex justify-between items-start gap-4">
-                  <h3 className="text-lg font-semibold line-clamp-2">
-                    <a
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline flex items-center gap-2"
-                    >
-                      {link.title}
-                      <Link2 className="h-4 w-4" />
-                    </a>
-                  </h3>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-semibold line-clamp-2">
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline flex items-center gap-2"
+                      >
+                        {link.title}
+                        <Link2 className="h-4 w-4" />
+                      </a>
+                    </h3>
+                    {link.publishedDate && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>{format(new Date(link.publishedDate), 'PPP')}</span>
+                      </div>
+                    )}
+                  </div>
                   <Button
                     variant="ghost"
                     size="icon"
