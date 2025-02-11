@@ -5,11 +5,14 @@ export const insertLinkSchema = z.object({
   url: z.string().url("Please enter a valid URL"),
   title: z.string(),
   imageUrl: z.string().optional(),
-  publishedDate: z.date(),
+  publishedDate: z
+    .union([z.string(), z.date()])  // Accepts both strings and Date objects
+    .refine((val) => !isNaN(new Date(val).getTime()), { message: "Invalid date" }) // Ensures valid date
+    .transform((val) => new Date(val)), // Converts to JavaScript Date
   tags: z.array(z.string()).default([]),
   scrapedTitle: z.string().optional(),
   scrapedImage: z.string().optional(),
-  notes: z.string().optional(),  // Added notes field
+  notes: z.string().optional(),
 });
 
 export type InsertLink = z.infer<typeof insertLinkSchema>;
