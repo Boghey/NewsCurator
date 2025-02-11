@@ -45,6 +45,14 @@ router.post("/links", async (req, res) => {
   }
 });
 
+router.patch("/links/:id/notes", async (req, res) => {
+  const id = parseInt(req.params.id)
+  const { notes } = req.body;
+  const updated = await storage.updateLinkNotes(id, notes);
+  res.send(updated);
+}
+  )
+
 router.delete("/links/:id", async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
