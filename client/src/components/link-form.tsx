@@ -87,7 +87,15 @@ export default function LinkForm() {
       <CardContent className="pt-6">
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit((data) => createLink.mutate(data))}
+            onSubmit={form.handleSubmit((data) => {
+              const formattedData = {
+                ...data,
+                publishedDate: data.publishedDate
+                  ? new Date(data.publishedDate).toISOString()
+                  : null,
+              };
+              createLink.mutate(formattedData);
+            })}
             className="space-y-4"
           >
             <FormField

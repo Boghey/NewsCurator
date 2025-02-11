@@ -41,7 +41,7 @@ router.post("/links", async (req, res) => {
     const created = await storage.createLink(req.body);
     res.send(created);
   } catch (error) {
-    res.status(400).json({ message: "Invalid link data" });
+    res.status(400).json({ message: error.message });
   }
 });
 
