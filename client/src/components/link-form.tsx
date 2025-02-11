@@ -94,7 +94,7 @@ export default function LinkForm() {
 
               const formattedData = {
                 ...data,
-                publishedDate: utcDate,
+                publishedDate: utcDate.toISOString(),
               };
 
               createLink.mutate(formattedData);
