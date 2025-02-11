@@ -9,6 +9,7 @@ export const insertLinkSchema = z.object({
   tags: z.array(z.string()).default([]),
   scrapedTitle: z.string().optional(),
   scrapedImage: z.string().optional(),
+  notes: z.string().optional(),  // Added notes field
 });
 
 export type InsertLink = z.infer<typeof insertLinkSchema>;
@@ -18,6 +19,7 @@ export interface IStorage {
   createLink(link: InsertLink): Promise<Link>;
   getLinksByTag(tag: string): Promise<Link[]>;
   deleteLink(id: number): Promise<void>;
+  updateLinkNotes(id: number, notes: string): Promise<Link>;  // Added new method
 }
 
 export class DatabaseStorage implements IStorage {
@@ -53,6 +55,13 @@ export class DatabaseStorage implements IStorage {
   async deleteLink(id: number): Promise<void> {
     await this.prisma.link.delete({
       where: { id },
+    });
+  }
+
+  async updateLinkNotes(id: number, notes: string): Promise<Link> {
+    return await this.prisma.link.update({
+      where: { id },
+      data: { notes },
     });
   }
 }

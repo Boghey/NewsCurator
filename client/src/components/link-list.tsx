@@ -1,14 +1,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Link } from "@shared/schema";
+import type { Link } from "../shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Link2, Trash2, Calendar } from "lucide-react";
+import { Link2, Trash2, Calendar, Edit, Save, Loader2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
 
 type LinkListProps = {
   links?: Link[];
@@ -18,6 +20,8 @@ type LinkListProps = {
 export default function LinkList({ links, onTagClick }: LinkListProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [editingNotes, setEditingNotes] = useState<number | null>(null);
+  const [notesInput, setNotesInput] = useState("");
 
   const deleteLink = useMutation({
     mutationFn: async (id: number) => {
@@ -38,6 +42,37 @@ export default function LinkList({ links, onTagClick }: LinkListProps) {
       });
     },
   });
+
+  const updateNotes = useMutation({
+    mutationFn: async ({ id, notes }: { id: number; notes: string }) => {
+      const res = await apiRequest("PATCH", `/api/links/${id}/notes`, { notes });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/links"] });
+      setEditingNotes(null);
+      toast({
+        title: "Success",
+        description: "Notes updated successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update notes",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEditNotes = (link: Link) => {
+    setEditingNotes(link.id);
+    setNotesInput(link.notes || "");
+  };
+
+  const handleSaveNotes = (id: number) => {
+    updateNotes.mutate({ id, notes: notesInput });
+  };
 
   if (!links) {
     return (
@@ -103,15 +138,54 @@ export default function LinkList({ links, onTagClick }: LinkListProps) {
                       </div>
                     )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteLink.mutate(link.id)}
-                    disabled={deleteLink.isPending}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditNotes(link)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteLink.mutate(link.id)}
+                      disabled={deleteLink.isPending}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
+
+                {editingNotes === link.id ? (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={notesInput}
+                      onChange={(e) => setNotesInput(e.target.value)}
+                      className="min-h-[100px]"
+                      placeholder="Add your notes..."
+                    />
+                    <Button
+                      onClick={() => handleSaveNotes(link.id)}
+                      disabled={updateNotes.isPending}
+                      size="sm"
+                    >
+                      {updateNotes.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : (
+                        <Save className="h-4 w-4 mr-2" />
+                      )}
+                      Save Notes
+                    </Button>
+                  </div>
+                ) : (
+                  link.notes && (
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {link.notes}
+                    </p>
+                  )
+                )}
+
                 <div className="flex flex-wrap gap-2">
                   {(link.tags || []).map((tag) => (
                     <Badge

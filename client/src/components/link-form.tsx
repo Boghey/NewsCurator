@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { Textarea } from "@/components/ui/textarea";
 import TagInput from "./tag-input";
 import { useState } from "react";
 import { Loader2, Calendar } from "lucide-react";
@@ -23,6 +24,7 @@ export default function LinkForm() {
       imageUrl: "",
       publishedDate: "",
       tags: [],
+      notes: "",
       scrapedTitle: null,
       scrapedImage: null,
       scrapedDate: null,
@@ -150,6 +152,24 @@ export default function LinkForm() {
                       />
                       <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Add your notes about this link..."
+                      className="min-h-[100px]"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
