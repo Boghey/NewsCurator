@@ -1,5 +1,12 @@
 import { useForm } from "react-hook-form";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -80,7 +87,18 @@ export default function LinkForm() {
     <Card className="w-full max-w-2xl mx-auto mb-8">
       <CardContent className="pt-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit((data) => createLink.mutate(data))} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit((data) => {
+              const formattedData = {
+                ...data,
+                publishedDate: data.publishedDate
+                  ? new Date(data.publishedDate).toISOString()
+                  : null,
+              };
+              createLink.mutate(formattedData);
+            })}
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="url"
@@ -123,7 +141,7 @@ export default function LinkForm() {
                 <FormItem>
                   <FormLabel>Image URL</FormLabel>
                   <FormControl>
-                    <Input 
+                    <Input
                       {...field}
                       value={value || ""}
                       onChange={(e) => onChange(e.target.value)}
@@ -143,7 +161,7 @@ export default function LinkForm() {
                   <FormLabel>Published Date</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Input 
+                      <Input
                         {...field}
                         value={value || ""}
                         onChange={(e) => onChange(e.target.value)}
@@ -183,10 +201,7 @@ export default function LinkForm() {
                 <FormItem>
                   <FormLabel>Tags</FormLabel>
                   <FormControl>
-                    <TagInput
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
+                    <TagInput value={field.value} onChange={field.onChange} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
