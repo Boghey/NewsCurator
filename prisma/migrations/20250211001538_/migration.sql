@@ -4,7 +4,6 @@ CREATE TABLE "Link" (
     "url" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "imageUrl" TEXT,
-    "publishedDate" TEXT,
     "tags" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "scrapedTitle" TEXT,
     "scrapedImage" TEXT,
