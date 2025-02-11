@@ -17,6 +17,9 @@ import { Textarea } from "@/components/ui/textarea";
 import TagInput from "./tag-input";
 import { useState } from "react";
 import { Loader2, Calendar } from "lucide-react";
+import { fromZonedTime } from "date-fns-tz";
+
+const timeZone = "America/New_York";
 
 export default function LinkForm() {
   const { toast } = useToast();
@@ -86,12 +89,14 @@ export default function LinkForm() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit((data) => {
+              const isoString = new Date(data.publishedDate).toISOString();
+              const utcDate = fromZonedTime(isoString, timeZone);
+
               const formattedData = {
                 ...data,
-                publishedDate: data.publishedDate
-                  ? new Date(data.publishedDate).toISOString()
-                  : null,
+                publishedDate: utcDate,
               };
+
               createLink.mutate(formattedData);
             })}
             className="space-y-4"

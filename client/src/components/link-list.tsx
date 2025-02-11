@@ -8,9 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Link2, Trash2, Calendar, Edit, Save, Loader2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { format, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
+import { format, startOfWeek} from "date-fns";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { toZonedTime } from "date-fns-tz";
+
+const timeZone = "America/New_York";
 
 type LinkListProps = {
   links?: Link[];
@@ -28,7 +31,7 @@ function groupLinksByWeek(links: Link[]): GroupedLinks[] {
   links.forEach(link => {
     if (!link.publishedDate) return;
 
-    const date = new Date(link.publishedDate);
+    const date = toZonedTime(new Date(link.publishedDate), timeZone);
     const weekStart = startOfWeek(date);
     const weekKey = weekStart.toISOString();
 
@@ -171,7 +174,7 @@ export default function LinkList({ links, onTagClick }: LinkListProps) {
                           {link.publishedDate && (
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <Calendar className="h-4 w-4" />
-                              <span>{format(new Date(link.publishedDate), 'PPP')}</span>
+                              <span>{format(toZonedTime(new Date(link.publishedDate), timeZone), 'PPP')}</span>
                             </div>
                           )}
                         </div>
