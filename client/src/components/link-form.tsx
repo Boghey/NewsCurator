@@ -33,7 +33,6 @@ export default function LinkForm() {
       notes: "",
       scrapedTitle: null,
       scrapedImage: null,
-      scrapedDate: null,
     },
   });
 
@@ -67,7 +66,6 @@ export default function LinkForm() {
 
       form.setValue("scrapedTitle", title);
       form.setValue("scrapedImage", image);
-      form.setValue("scrapedDate", publishedDate);
       if (title) form.setValue("title", title);
       if (image) form.setValue("imageUrl", image);
       if (publishedDate) form.setValue("publishedDate", publishedDate);
