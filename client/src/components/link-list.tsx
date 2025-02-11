@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Link2, Trash2, Calendar, Edit, Save, Loader2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -16,6 +16,35 @@ type LinkListProps = {
   links?: Link[];
   onTagClick?: (tag: string) => void;
 };
+
+type GroupedLinks = {
+  weekStart: Date;
+  links: Link[];
+};
+
+function groupLinksByWeek(links: Link[]): GroupedLinks[] {
+  const groupedLinks: Record<string, Link[]> = {};
+
+  links.forEach(link => {
+    if (!link.publishedDate) return;
+
+    const date = new Date(link.publishedDate);
+    const weekStart = startOfWeek(date);
+    const weekKey = weekStart.toISOString();
+
+    if (!groupedLinks[weekKey]) {
+      groupedLinks[weekKey] = [];
+    }
+    groupedLinks[weekKey].push(link);
+  });
+
+  return Object.entries(groupedLinks)
+    .map(([weekKey, links]) => ({
+      weekStart: new Date(weekKey),
+      links,
+    }))
+    .sort((a, b) => b.weekStart.getTime() - a.weekStart.getTime());
+}
 
 export default function LinkList({ links, onTagClick }: LinkListProps) {
   const { toast } = useToast();
@@ -99,108 +128,119 @@ export default function LinkList({ links, onTagClick }: LinkListProps) {
     );
   }
 
+  const groupedLinks = groupLinksByWeek(links);
+
   return (
     <ScrollArea className="h-[calc(100vh-300px)]">
-      <div className="space-y-4">
-        {links.map((link) => (
-          <Card key={link.id}>
-            <CardContent className="pt-6 grid md:grid-cols-[200px,1fr] gap-4">
-              {link.imageUrl && (
-                <div className="relative aspect-video">
-                  <img
-                    src={link.imageUrl}
-                    alt={link.title}
-                    className="object-cover rounded-md w-full h-full"
-                    onError={(e) => {
-                      e.currentTarget.src = "https://placehold.co/600x400?text=No+Image";
-                    }}
-                  />
-                </div>
-              )}
-              <div className="space-y-2">
-                <div className="flex justify-between items-start gap-4">
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-semibold line-clamp-2">
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline flex items-center gap-2"
-                      >
-                        {link.title}
-                        <Link2 className="h-4 w-4" />
-                      </a>
-                    </h3>
-                    {link.publishedDate && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        <span>{format(new Date(link.publishedDate), 'PPP')}</span>
+      <div className="space-y-8">
+        {groupedLinks.map(({ weekStart, links }) => (
+          <div key={weekStart.toISOString()} className="space-y-4">
+            <h2 className="text-xl font-semibold text-foreground/80">
+              Week of {format(weekStart, 'MMMM d, yyyy')}
+            </h2>
+            <div className="space-y-4">
+              {links.map((link) => (
+                <Card key={link.id}>
+                  <CardContent className="pt-6 grid md:grid-cols-[200px,1fr] gap-4">
+                    {link.imageUrl && (
+                      <div className="relative aspect-video">
+                        <img
+                          src={link.imageUrl}
+                          alt={link.title}
+                          className="object-cover rounded-md w-full h-full"
+                          onError={(e) => {
+                            e.currentTarget.src = "https://placehold.co/600x400?text=No+Image";
+                          }}
+                        />
                       </div>
                     )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEditNotes(link)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteLink.mutate(link.id)}
-                      disabled={deleteLink.isPending}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="space-y-1">
+                          <h3 className="text-lg font-semibold line-clamp-2">
+                            <a
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:underline flex items-center gap-2"
+                            >
+                              {link.title}
+                              <Link2 className="h-4 w-4" />
+                            </a>
+                          </h3>
+                          {link.publishedDate && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Calendar className="h-4 w-4" />
+                              <span>{format(new Date(link.publishedDate), 'PPP')}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditNotes(link)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteLink.mutate(link.id)}
+                            disabled={deleteLink.isPending}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </div>
 
-                {editingNotes === link.id ? (
-                  <div className="space-y-2">
-                    <Textarea
-                      value={notesInput}
-                      onChange={(e) => setNotesInput(e.target.value)}
-                      className="min-h-[100px]"
-                      placeholder="Add your notes..."
-                    />
-                    <Button
-                      onClick={() => handleSaveNotes(link.id)}
-                      disabled={updateNotes.isPending}
-                      size="sm"
-                    >
-                      {updateNotes.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      {editingNotes === link.id ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            value={notesInput}
+                            onChange={(e) => setNotesInput(e.target.value)}
+                            className="min-h-[100px]"
+                            placeholder="Add your notes..."
+                          />
+                          <Button
+                            onClick={() => handleSaveNotes(link.id)}
+                            disabled={updateNotes.isPending}
+                            size="sm"
+                          >
+                            {updateNotes.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                              <Save className="h-4 w-4 mr-2" />
+                            )}
+                            Save Notes
+                          </Button>
+                        </div>
                       ) : (
-                        <Save className="h-4 w-4 mr-2" />
+                        link.notes && (
+                          <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                            {link.notes}
+                          </p>
+                        )
                       )}
-                      Save Notes
-                    </Button>
-                  </div>
-                ) : (
-                  link.notes && (
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      {link.notes}
-                    </p>
-                  )
-                )}
 
-                <div className="flex flex-wrap gap-2">
-                  {(link.tags || []).map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="secondary"
-                      className="cursor-pointer hover:bg-secondary/80"
-                      onClick={() => onTagClick?.(tag)}
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                      <div className="flex flex-wrap gap-2">
+                        {(link.tags || []).map((tag) => (
+                          <Badge
+                            key={tag}
+                            variant="secondary"
+                            className="cursor-pointer hover:bg-secondary/80"
+                            onClick={() => onTagClick?.(tag)}
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </ScrollArea>
