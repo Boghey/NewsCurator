@@ -17,7 +17,6 @@ import { Textarea } from "@/components/ui/textarea";
 import TagInput from "./tag-input";
 import { useState } from "react";
 import { Loader2, Calendar } from "lucide-react";
-import { format } from "date-fns";
 
 export default function LinkForm() {
   const { toast } = useToast();
@@ -88,15 +87,7 @@ export default function LinkForm() {
       <CardContent className="pt-6">
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit((data) => {
-              const formattedData = {
-                ...data,
-                publishedDate: data.publishedDate
-                  ? new Date(data.publishedDate).toISOString()
-                  : null,
-              };
-              createLink.mutate(formattedData);
-            })}
+            onSubmit={form.handleSubmit((data) => createLink.mutate(data))}
             className="space-y-4"
           >
             <FormField
