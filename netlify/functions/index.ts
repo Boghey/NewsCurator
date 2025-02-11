@@ -2,9 +2,14 @@ import express, { Router } from "express";
 import {scrapeMetadata} from "./server/routes";
 import serverless from "serverless-http";
 import {storage} from "./prisma/storage"
+import path from "path";
 
 const app = express();
 const router = Router();
+
+app.use(express.json())
+const distPath = path.resolve("dist");
+app.use(express.static(distPath));
 
 router.get("/hello", (req, res) => {
   res.send("Hello World!");
@@ -51,5 +56,9 @@ router.delete("/links/:id", async (req, res) => {
 });
 
 app.use("/api/", router);
+
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(distPath, "index.html"));
+});
 
 export const handler = serverless(app);
